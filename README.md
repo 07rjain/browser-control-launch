@@ -2,6 +2,8 @@
 
 A responsive React/TypeScript launch site and an editable 45-second, 1920×1080, 30 fps Remotion film for [Browser Control](https://chromewebstore.google.com/detail/browser-control/mpdfhhhjgbpdpfnkjbnboebdjokfjglf).
 
+Live website: **https://browser-control-launch.vercel.app**. The Vercel project is connected to this GitHub repository; pushes to `main` deploy to production automatically.
+
 ## Run the website
 
 ```sh
@@ -16,7 +18,7 @@ npm run build     # Strict TypeScript check, then production website in dist/
 npm run preview   # Serve the production build locally
 ```
 
-Deploy `dist/` to any static host, including Netlify, Vercel, Cloudflare Pages, or GitHub Pages with a custom domain. Build command: `npm run build`. Output directory: `dist`. The current site assumes deployment at the domain root. For a GitHub project subdirectory, update Vite's base and the root-relative public asset paths first. Add the final domain to the Open Graph image URL in `index.html` when publishing.
+Vercel uses the settings in `vercel.json`: build command `npm run build`, output directory `dist`. You can also deploy `dist/` to another static host, including Netlify, Cloudflare Pages, or GitHub Pages with a custom domain. The current site assumes deployment at the domain root. For a GitHub project subdirectory, update Vite's base and the root-relative public asset paths first. Update the canonical and Open Graph URLs in `index.html` if you change the production domain.
 
 `website-preview.html` is a portable preview with the JavaScript, styles, fonts, and images embedded. Open it locally alongside this workspace's `public/` folder for video playback. Regenerate it with `npm run export:preview`. Use `dist/` for deployment.
 
@@ -71,4 +73,4 @@ Product claims were checked against the public Chrome Web Store description and 
 - Interface icons: Lucide, ISC license.
 - Abstract Kyoto landscape: original CSS illustration; the example site and travel task are fictional.
 
-The copy explains the separate local companion and eligible account requirements. It distinguishes Auto review from Full access, says memory is opt-in and local, and links the official privacy policy and support guide. No publisher analytics, form backend, fabricated testimonials, or usage metrics were added. Deployment and a custom domain are not configured.
+The copy explains the separate local companion and eligible account requirements. It distinguishes Auto review from Full access, says memory is opt-in and local, and links the official privacy policy and support guide. No publisher analytics, form backend, fabricated testimonials, or usage metrics were added. The site is deployed on Vercel; a custom domain is not configured.
