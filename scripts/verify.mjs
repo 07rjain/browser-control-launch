@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { existsSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { chromium } from '@playwright/test';
 
 // Exercise observable behavior against a running development or production server.
@@ -11,6 +11,7 @@ const browser = await chromium.launch({
 });
 mkdirSync('out/verification', { recursive: true });
 const errors = [];
+const videoMetadata = JSON.parse(readFileSync('src/video/metadata.json', 'utf8'));
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   page.on('pageerror', error => errors.push(error.message));
@@ -54,7 +55,7 @@ try {
   await page.waitForFunction(() => document.querySelector('video')?.readyState >= 1);
   assert.equal(await page.getByRole('dialog').isVisible(), true);
   const media = await page.locator('video').evaluate(video => ({ duration: video.duration, width: video.videoWidth, height: video.videoHeight }));
-  assert.ok(Math.abs(media.duration - 45) < .1);
+  assert.ok(Math.abs(media.duration - videoMetadata.durationSeconds) < .1);
   assert.equal(media.width, 1920);
   assert.equal(media.height, 1080);
   await page.keyboard.press('Escape');

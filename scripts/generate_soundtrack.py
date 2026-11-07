@@ -1,11 +1,13 @@
 """Generate the film's original, sample-free ambient instrumental with stdlib only."""
 import array
 import math
+import json
 import wave
 from pathlib import Path
 
 sample_rate = 44100
-duration = 45
+metadata = json.loads((Path(__file__).resolve().parent.parent / 'src/video/metadata.json').read_text())
+duration = metadata['durationSeconds']
 chords = [(130.81, 164.81, 196), (110, 130.81, 164.81),
           (87.31, 110, 130.81), (98, 123.47, 146.83)]
 samples = array.array("h")

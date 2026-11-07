@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { ArrowRight, ArrowUpRight, Brain, Check, ChevronDown, Chrome, Download, Github, Menu, MousePointer2, Play, ShieldCheck, WandSparkles, X } from 'lucide-react';
 import { ProductPreview } from './components/ProductPreview';
 import { features, GITHUB_URL, PRIVACY_URL, STORE_URL, SUPPORT_URL } from './content';
+import videoMetadata from './video/metadata.json';
 
 const featureTabs = [
   { label: 'Browse', icon: MousePointer2, title: 'A hand with the page you’re on.', description: 'Attach a page for context. Ask questions, organize tabs, and work through browser tasks in plain English.' },
@@ -34,9 +35,9 @@ function VideoDialog({ onClose }: { onClose: () => void }) {
     };
   }, [onClose]);
   return <dialog ref={dialog} className="video-dialog" aria-label="Browser Control demo video" onClick={event => { if (event.target === dialog.current) onClose(); }}>
-    <div className="video-dialog-heading"><span>Browser Control in 45 seconds</span><button onClick={onClose} aria-label="Close video"><X size={21} /></button></div>
+    <div className="video-dialog-heading"><span>Browser Control in {videoMetadata.durationSeconds} seconds</span><button onClick={onClose} aria-label="Close video"><X size={21} /></button></div>
     <video src="/browser-control-demo.mp4" poster="/assets/video-poster.jpg" controls autoPlay playsInline preload="metadata"><track kind="captions" src="/demo-captions.vtt" srcLang="en" label="English" /></video>
-    <div className="video-dialog-footer"><span>Animated walkthrough, with an actual extension screenshot.</span><a href="/browser-control-demo.mp4" download><Download size={14} /> Download</a></div>
+    <div className="video-dialog-footer"><span>An animated walkthrough of the extension’s features.</span><a href="/browser-control-demo.mp4" download><Download size={14} /> Download</a></div>
   </dialog>;
 }
 
@@ -76,7 +77,7 @@ export function App() {
         <a className="product-label" href={GITHUB_URL} target="_blank" rel="noreferrer"><span /> An open-source Chrome extension <ArrowUpRight size={12} /></a>
         <h1 id="hero-title">ChatGPT, right beside<br className="hero-break" /> <span>the page you’re on.</span></h1>
         <p className="hero-description">Ask about a page. Remember what matters.<br className="hero-break" /> Turn everyday browser tasks into a conversation.</p>
-        <div className="hero-actions"><InstallLink /><button ref={videoTrigger} className="button secondary" onClick={() => setVideoOpen(true)}><Play size={16} /> Watch the demo <span>45 sec</span></button></div>
+        <div className="hero-actions"><InstallLink /><button ref={videoTrigger} className="button secondary" onClick={() => setVideoOpen(true)}><Play size={16} /> Watch the demo <span>{videoMetadata.durationSeconds} sec</span></button></div>
         <p className="hero-requirements">Uses your ChatGPT/Codex account. <a href="#how-it-works">Free local companion required <ArrowRight size={12} /></a></p>
       </section>
 

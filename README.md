@@ -1,6 +1,6 @@
 # Browser Control launch website + Remotion film
 
-A responsive React/TypeScript launch site and an editable 45-second, 1920×1080, 30 fps Remotion film for [Browser Control](https://chromewebstore.google.com/detail/browser-control/mpdfhhhjgbpdpfnkjbnboebdjokfjglf).
+A responsive React/TypeScript launch site and an editable 36-second, 1920×1080, 30 fps Remotion film for [Browser Control](https://chromewebstore.google.com/detail/browser-control/mpdfhhhjgbpdpfnkjbnboebdjokfjglf).
 
 Live website: **https://browser-control.subdomain.wtf**. The Vercel fallback is https://browser-control-launch.vercel.app. The Vercel project is connected to this GitHub repository; pushes to `main` deploy to production automatically.
 
@@ -33,21 +33,20 @@ npm run build         # Copy the latest video and poster to dist/
 
 The first Remotion command downloads its Chrome Headless Shell. Linux requires Chrome's standard runtime libraries. The render uses two workers to keep memory use modest.
 
-Video source: `src/video/LaunchFilm.tsx`; motion/layout: `src/video/video.css`; duration and resolution: `src/video/Root.tsx`. The film uses `src/components/DemoBrowser.tsx`. The website has a separate light-theme preview in `src/components/ProductPreview.tsx`; both use the feature examples in `src/content.ts`.
+Video source: `src/video/LaunchFilm.tsx`; motion/layout: `src/video/video.css`; duration and resolution: `src/video/metadata.json`. Both the film and website use the light-theme `src/components/ProductPreview.tsx` and feature examples in `src/content.ts`. The film adds spring entrances, typed prompts, staged results, cursor clicks, and fade/slide transitions using `@remotion/transitions`.
 
 The website uses a compact light layout: one hero, an accessible four-tab feature explorer, three installation steps, and three expandable questions. On phones, the explorer focuses on the assistant panel. Permission choices in the preview change the example only.
 
 | Time | Scene |
 | --- | --- |
-| 0–5 s | Product introduction |
-| 5–15 s | Attached page context and tab organization |
-| 15–23 s | Opt-in saved memory |
-| 23–31 s | Recording reusable skills |
-| 31–37 s | Permission modes |
-| 37–41 s | Actual extension screenshot |
-| 41–45 s | Chrome install and companion setup |
+| 0–4 s | Product introduction |
+| 4–11 s | Attached page context and tab organization |
+| 11–17 s | Opt-in saved memory |
+| 17–24 s | Recording reusable skills |
+| 24–30 s | Permission modes and visible stop control |
+| 30–36 s | Chrome install, companion setup, and website |
 
-The film is an **animated feature walkthrough**, with illustrative interactions and one real repository screenshot. It is not a recording of a signed-in live Codex session. That distinction is disclosed in the film and on the website. Captions are burned into the video and supplied separately in `public/demo-captions.vtt`. The original ambient instrumental is generated locally; it contains no licensed samples. There is no voiceover.
+The film is an **animated feature walkthrough** with illustrative interactions, styled to match the website's white-and-blue theme. This is disclosed in the film and on the website. Concise subtitles are burned into the video; `src/video/captions.json` is the shared source for those subtitles and `public/demo-captions.vtt`. Run `npm run video:captions` to validate cue coverage and regenerate the VTT; rendering also runs this step. The original ambient instrumental is generated locally; it contains no licensed samples. There is no voiceover.
 
 Regenerate the soundtrack, if needed, with `python3 scripts/generate_soundtrack.py` before rendering.
 
@@ -70,7 +69,7 @@ Product claims were checked against the public Chrome Web Store description and 
 - Official links: `src/content.ts`.
 - Product icon: extension `public/icons/icon-128.png`.
 - Favicon: extension `assets/browser-control-icon.svg`.
-- Actual screenshot: extension `store/assets/screenshots/final/03-clear-results-1280x800.png`.
+- Reference screenshot (unused in the current film): extension `store/assets/screenshots/final/03-clear-results-1280x800.png`.
 - DM Sans: bundled locally via Fontsource; its license is in `node_modules/@fontsource/dm-sans/LICENSE`.
 - Interface icons: Lucide, ISC license.
 - Abstract Kyoto landscape: original CSS illustration; the example site and travel task are fictional.

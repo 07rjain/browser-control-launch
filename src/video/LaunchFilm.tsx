@@ -1,49 +1,132 @@
-import { AbsoluteFill, Audio, Img, interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
-import { ArrowRight, Brain, Check, Chrome, Code2, MousePointer2, ShieldCheck, Sparkles, WandSparkles } from 'lucide-react';
-import '@fontsource/dm-sans/400.css';
-import '@fontsource/dm-sans/500.css';
-import '@fontsource/dm-sans/600.css';
-import '@fontsource/dm-sans/700.css';
-import { DemoBrowser } from '../components/DemoBrowser';
-import { type FeatureId } from '../content';
+import type { CSSProperties, ReactNode } from 'react';
+import { AbsoluteFill, Audio, Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
+import { TransitionSeries, linearTiming } from '@remotion/transitions';
+import { fade } from '@remotion/transitions/fade';
+import { slide } from '@remotion/transitions/slide';
+import { ArrowRight, Brain, Check, Chrome, Globe2, MousePointer2, ShieldCheck, Square, WandSparkles } from 'lucide-react';
+import '@fontsource/dm-sans/latin-400.css';
+import '@fontsource/dm-sans/latin-500.css';
+import '@fontsource/dm-sans/latin-600.css';
+import '../styles.css';
 import './video.css';
+import { ProductPreview } from '../components/ProductPreview';
+import type { FeatureId } from '../content';
+import captions from './captions.json';
+import metadata from './metadata.json';
 
-const lime = '#d1ee9b';
 const clamp = { extrapolateLeft: 'clamp' as const, extrapolateRight: 'clamp' as const };
-function useEntrance(delay = 0) { const frame = useCurrentFrame(); const { fps } = useVideoConfig(); return spring({ frame: frame - delay, fps, config: { damping: 22, stiffness: 95, mass: .9 } }); }
-function Brand() { return <div className="film-brand"><Img src={staticFile('icon.png')} /><span>browser<span>control</span><b>.</b></span></div>; }
-function Caption({ children }: { children: React.ReactNode }) { return <div className="film-caption"><span>{children}</span></div>; }
-function Frame({ children, chapter }: { children: React.ReactNode; chapter: string }) { return <AbsoluteFill className="film-scene"><div className="film-grid" /><div className="film-top"><Brand /><span>YOUR BROWSER, A LITTLE MORE CAPABLE.</span></div>{children}<div className="film-bottom"><span>OPEN SOURCE. BUILT FOR YOUR EVERYDAY.</span><span>{chapter}</span></div></AbsoluteFill>; }
+const blue = '#2563eb';
+const featureData = {
+  browse: { label: 'Browse', icon: MousePointer2, headline: <>Less busywork.<br /><em>More browsing.</em></>, description: 'Attach a page. Ask in plain English.', note: 'You choose when to share page context.' },
+  memory: { label: 'Memory', icon: Brain, headline: <>A little memory.<br /><em>Less repeating.</em></>, description: 'Keep useful preferences for your next chat.', note: 'Opt-in. Stored locally. Edit or forget anytime.' },
+  skills: { label: 'Skills', icon: WandSparkles, headline: <>Show it once.<br /><em>Use it again.</em></>, description: 'Record. Review. Save a reusable workflow.', note: 'Recording starts only when you choose.' },
+  permissions: { label: 'Control', icon: ShieldCheck, headline: <>Your browser.<br /><em>Your rules.</em></>, description: 'Choose your permission mode.', note: 'Auto review uses extra Codex usage. Site access is separate.' },
+};
+
+function pop(frame: number, fps: number, delay = 0) {
+  return spring({ frame: frame - delay, fps, config: { damping: 24, stiffness: 110, mass: .8 } });
+}
+
+function Enter({ children, delay = 0, distance = 30, className = '', style }: { children: ReactNode; delay?: number; distance?: number; className?: string; style?: CSSProperties }) {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const amount = pop(frame, fps, delay);
+  return <div className={className} style={{ opacity: amount, transform: `translateY(${(1 - amount) * distance}px)`, ...style }}>{children}</div>;
+}
+
+function Header() {
+  const frame = useCurrentFrame();
+  const current = frame < 120 ? 'Meet Browser Control' : frame < 330 ? '01 — Browse' : frame < 510 ? '02 — Memory' : frame < 720 ? '03 — Skills' : frame < 900 ? '04 — Control' : 'Make it yours';
+  return <div className="movie-header"><div className="movie-brand"><Img src={staticFile('icon.png')} /><span>Browser Control</span></div><span>{current}</span></div>;
+}
+
+function Subtitles() {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const cue = captions.find(item => frame >= item.from * fps && frame < item.to * fps);
+  if (!cue) return null;
+  const local = frame - cue.from * fps;
+  const duration = (cue.to - cue.from) * fps;
+  const opacity = interpolate(local, [0, 6, duration - 6, duration], [0, 1, 1, 0], clamp);
+  return <div className="movie-subtitles" style={{ opacity, transform: `translateY(${interpolate(local, [0, 9], [9, 0], clamp)}px)` }}><span key={cue.from}>{cue.text}</span></div>;
+}
 
 function Intro() {
-  const frame = useCurrentFrame(); const enter = useEntrance(); const text = useEntrance(6);
-  return <Frame chapter="MEET BROWSER CONTROL"><div className="film-intro-copy" style={{ opacity: text, transform: `translateY(${(1-text)*30}px)` }}><div className="film-eyebrow"><span /> YOUR NEW FAVORITE EXTENSION</div><h1>Your browser.<br />Now with a little<br /><em>superpower.</em></h1><p>Your ChatGPT/Codex account.<br />Right beside the page you’re on.</p><div className="film-tags"><span><Chrome size={22} /> Chrome extension</span><span><Code2 size={22} /> Open source</span></div></div><div className="film-intro-art" style={{ opacity: enter, transform: `translateY(${(1-enter)*55}px) rotate(${interpolate(frame,[0,150],[-4,-1],clamp)}deg)` }}><div className="film-orbit orbit-one" /><div className="film-orbit orbit-two" /><div className="film-big-icon"><Img src={staticFile('icon.png')} /></div><div className="film-floating floating-memory"><Brain size={31} /><span>A little memory.</span><Check size={20} /></div><div className="film-floating floating-skills"><WandSparkles size={30} /><span>A better workflow.</span><Sparkles size={22} /></div><div className="film-intro-dot d1" /><div className="film-intro-dot d2" /></div><Caption>Meet Browser Control. A little help, right where you are.</Caption></Frame>;
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  return <AbsoluteFill className="movie-scene">
+    <Enter className="movie-intro-label" delay={4}><span /> An open-source Chrome extension</Enter>
+    <div className="movie-intro-title"><Enter delay={8}><h1>ChatGPT, right beside</h1></Enter><Enter delay={15}><h1 className="muted-heading">the page you’re on.</h1></Enter></div>
+    <Enter className="movie-intro-description" delay={23}>Ask. Remember. Get things done.</Enter>
+    <div className="movie-intro-features">{Object.entries(featureData).map(([key, value], index) => { const Icon = value.icon; const amount = pop(frame, fps, 30 + index * 6); return <div key={key} style={{ opacity: amount, transform: `translateY(${(1 - amount) * 28}px) scale(${.94 + amount * .06})` }}><span><Icon size={24} /></span>{value.label}</div>; })}</div>
+  </AbsoluteFill>;
 }
 
-const scenes: Record<FeatureId, { number: string; eyebrow: string; heading: React.ReactNode; body: string; caption: string; note: string }> = {
-  browse: { number:'01', eyebrow:'BROWSER ACTIONS', heading:<>Less clicking.<br /><em>More doing.</em></>, body:'Attach a page. Ask a question. Organize tabs and work through browser tasks in plain English.', caption:'Bring page context into the conversation. Keep every browser action in view.', note:'You choose when to attach page context.' },
-  memory: { number:'02', eyebrow:'SAVED MEMORY', heading:<>Skip the<br /><em>reintroductions.</em></>, body:'Your useful preferences, ready for the next regular chat. Edit or forget them whenever you like.', caption:'Enable memory once. Keep useful preferences across regular chats.', note:'Opt-in memory. Stored on this computer.' },
-  skills: { number:'03', eyebrow:'REUSABLE SKILLS', heading:<>Show it once.<br /><em>Use it again.</em></>, body:'Demonstrate your browser workflow. Review the recording. Save a skill for matching requests.', caption:'Describe. Demonstrate. Review. Save your way of doing things as a local skill.', note:'Recording starts only when you choose Start recording.' },
-  permissions: { number:'04', eyebrow:'YOUR BROWSER. YOUR CALL.', heading:<>Find your flow.<br /><em>Set the rules.</em></>, body:'Ask every time, Auto review, or Full access. Choose your mode, follow the activity, and stop anytime.', caption:'Choose how actions are approved. Activity, action limits, and Stop stay available.', note:'Auto review uses extra Codex usage; site access is separate.' },
-};
-function FeatureScene({ feature, duration }: { feature: FeatureId; duration: number }) {
-  const frame = useCurrentFrame(); const enter = useEntrance(); const ui = useEntrance(7); const data = scenes[feature];
-  const progress = interpolate(frame, [20, Math.min(duration-35,150)], [0,1], clamp);
-  const Icon = feature === 'browse' ? MousePointer2 : feature === 'memory' ? Brain : feature === 'skills' ? WandSparkles : ShieldCheck;
-  return <Frame chapter={`${data.number} / 04 — ${data.eyebrow}`}><div className="film-feature-copy" style={{ opacity:enter,transform:`translateY(${(1-enter)*30}px)` }}><div className="film-chapter-icon"><Icon size={34} /></div><div className="film-eyebrow">{data.eyebrow}</div><h2>{data.heading}</h2><p>{data.body}</p><div className="film-feature-note"><ShieldCheck size={20} /><span>{data.note}</span></div></div><div className="film-browser-stage" style={{ opacity:ui,transform:`translateX(${(1-ui)*70}px) scale(${interpolate(frame,[0,duration],[.98,1.015],clamp)})` }}><div className="film-browser-label"><span /> A LITTLE LESS BUSYWORK.</div><div className="film-browser-scale"><DemoBrowser feature={feature} progress={progress} video iconSrc={staticFile('icon.png')} /></div><div className="film-illustration-label">Illustrative feature walkthrough</div></div><Caption>{data.caption}</Caption></Frame>;
+function Cursor({ feature, frame }: { feature: FeatureId; frame: number }) {
+  const clickFrame = feature === 'permissions' ? 92 : 42;
+  const opacity = interpolate(frame, [clickFrame - 25, clickFrame - 16, clickFrame + 20, clickFrame + 30], [0, 1, 1, 0], clamp);
+  const x = feature === 'permissions' ? interpolate(frame, [clickFrame - 25, clickFrame], [790, 705], clamp) : interpolate(frame, [clickFrame - 25, clickFrame], [880, 944], clamp);
+  const y = feature === 'permissions' ? interpolate(frame, [clickFrame - 25, clickFrame], [420, 345], clamp) : interpolate(frame, [clickFrame - 25, clickFrame], [550, 502], clamp);
+  const ring = interpolate(frame, [clickFrame, clickFrame + 15], [0, 1], clamp);
+  return <div className="movie-cursor" style={{ opacity, left: x, top: y }}><div className="cursor-click" style={{ opacity: frame >= clickFrame ? 1 - ring : 0, transform: `translate(-50%, -50%) scale(${.4 + ring * 1.7})` }} /><MousePointer2 size={30} fill="#2563eb" stroke="white" strokeWidth={1.6} /></div>;
 }
 
-function ActualExtension() {
-  const frame=useCurrentFrame(); const enter=useEntrance();
-  return <Frame chapter="INSIDE THE EXTENSION"><div className="film-proof-copy" style={{opacity:enter}}><div className="film-eyebrow">REAL EXTENSION. REAL SIDE PANEL.</div><h2>Stay focused.<br /><em>Keep control.</em></h2><p>Chat beside the page.<br />Keep the conversation in context.</p><span className="film-proof-note">Screenshot from the open-source project</span></div><div className="film-real-screen" style={{opacity:enter,transform:`translateY(${(1-enter)*25}px) scale(${interpolate(frame,[0,120],[1,1.025],clamp)})`}}><Img src={staticFile('assets/extension-screenshot.png')} /></div><Caption>One small side panel. A more capable everyday browser.</Caption></Frame>;
+function Feature({ feature, duration }: { feature: FeatureId; duration: number }) {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const data = featureData[feature];
+  const Icon = data.icon;
+  const progress = interpolate(frame, [30, duration - 42], [0, 1], clamp);
+  const browser = pop(frame, fps, 10);
+  const saved = pop(frame, fps, duration - 76);
+  return <AbsoluteFill className={`movie-scene movie-feature movie-${feature}`}>
+    <div className="movie-feature-copy"><Enter delay={4}><div className="movie-feature-icon"><Icon size={32} /></div></Enter><Enter delay={9}><span className="movie-eyebrow">{data.label}</span><h2>{data.headline}</h2></Enter><Enter delay={17}><p className="movie-description">{data.description}</p></Enter><Enter delay={24}><p className="movie-note"><ShieldCheck size={18} />{data.note}</p></Enter></div>
+    <div className="movie-stage" style={{ opacity: browser, transform: `translateX(${(1 - browser) * 65}px) scale(${interpolate(frame, [0, duration], [.99, 1.01], clamp)})` }}>
+      <ProductPreview feature={feature} iconSrc={staticFile('icon.png')} progress={progress} animate />
+      {(feature === 'browse' || feature === 'permissions') && <Cursor feature={feature} frame={frame} />}
+      {feature === 'memory' && <div className="movie-toast" style={{ opacity: saved, transform: `translateY(${(1 - saved) * 20}px) scale(${.94 + saved * .06})` }}><span className="toast-check"><Check size={19} /></span><div>Preference saved.<small>Ready for your next regular chat.</small></div><Brain size={22} /></div>}
+      {feature === 'skills' && <div className="movie-toast" style={{ opacity: saved, transform: `translateY(${(1 - saved) * 20}px) scale(${.94 + saved * .06})` }}><span className="toast-check"><Check size={19} /></span><div>Your workflow, saved.<small>Available for matching requests.</small></div><WandSparkles size={22} /></div>}
+      {feature === 'permissions' && <div className="movie-control-status" style={{ opacity: saved, transform: `translateY(${(1 - saved) * 12}px)` }}><span><span className="activity-dot" /> Activity stays visible</span><span className="movie-stop"><Square size={11} fill="currentColor" /> Stop</span></div>}
+    </div>
+  </AbsoluteFill>;
 }
+
 function Outro() {
-  const frame=useCurrentFrame(); const enter=useEntrance();
-  return <Frame chapter="MAKE IT YOURS"><div className="film-outro" style={{opacity:enter,transform:`translateY(${(1-enter)*25}px)`}}><div className="film-eyebrow">SAME BROWSER. NEW POSSIBILITIES.</div><h2>A little help.<br /><em>A lot more possible.</em></h2><div className="film-cta"><Chrome size={28} /> Add Browser Control to Chrome <ArrowRight size={25} /></div><div className="film-outro-steps"><span>01 <b>Add the extension</b></span><ArrowRight size={18} /><span>02 <b>Install the companion</b></span><ArrowRight size={18} /><span>03 <b>Sign in with ChatGPT</b></span></div><p>Find “Browser Control” in the Chrome Web Store</p><small>Requires Node.js 20+, a compatible Codex CLI, the free local companion,<br />and an eligible ChatGPT/Codex account. macOS · Windows · Linux.</small></div><div className="film-end-line" style={{width:interpolate(frame,[0,120],[0,100],clamp)+'%'}} /><Caption>Open source. No API key. Set up the local companion, sign in, and make it yours.</Caption></Frame>;
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  return <AbsoluteFill className="movie-scene movie-outro">
+    <Enter className="movie-outro-icon" delay={5}><Img src={staticFile('icon.png')} /></Enter>
+    <Enter delay={12}><h2>A better flow.<br /><span>One side panel.</span></h2></Enter>
+    <Enter delay={21}><div className="movie-install"><Chrome size={27} /> Add to Chrome <ArrowRight size={24} /></div></Enter>
+    <Enter delay={29}><div className="movie-domain"><Globe2 size={24} /> browser-control.subdomain.wtf</div></Enter>
+    <div className="movie-setup">{['Add the extension', 'Install the companion', 'Sign in with ChatGPT'].map((step, index) => { const amount = pop(frame, fps, 35 + index * 9); return <div key={step} style={{ opacity: amount, transform: `translateY(${(1 - amount) * 16}px)` }}><span>{index + 1}</span>{step}{index < 2 && <ArrowRight size={17} />}</div>; })}</div>
+    <Enter className="movie-requirements" delay={50}>Requires Node.js 20+, a compatible Codex CLI, the free local companion,<br />and an eligible ChatGPT/Codex account. No API key.</Enter>
+  </AbsoluteFill>;
 }
 
 export function LaunchFilm() {
   const frame = useCurrentFrame();
-  const fade = interpolate(frame,[0,10,1332,1349],[0,1,1,0],clamp);
-  return <AbsoluteFill style={{background:'#101110',fontFamily:'DM Sans, sans-serif',color:'#eeefe6'}}><AbsoluteFill style={{opacity:fade}}><Sequence durationInFrames={150}><Intro /></Sequence><Sequence from={150} durationInFrames={300}><FeatureScene feature="browse" duration={300} /></Sequence><Sequence from={450} durationInFrames={240}><FeatureScene feature="memory" duration={240} /></Sequence><Sequence from={690} durationInFrames={240}><FeatureScene feature="skills" duration={240} /></Sequence><Sequence from={930} durationInFrames={180}><FeatureScene feature="permissions" duration={180} /></Sequence><Sequence from={1110} durationInFrames={120}><ActualExtension /></Sequence><Sequence from={1230} durationInFrames={120}><Outro /></Sequence><div className="film-progress"><div style={{width:`${frame/1349*100}%`,background:lime}} /></div></AbsoluteFill><Audio src={staticFile('assets/ambient.wav')} volume={.55} /></AbsoluteFill>;
+  const duration = metadata.durationSeconds * metadata.fps;
+  const opacity = interpolate(frame, [0, 8, duration - 10, duration - 1], [0, 1, 1, 0], clamp);
+  return <AbsoluteFill style={{ background: '#fff', color: '#1d2636', fontFamily: 'DM Sans, sans-serif' }}>
+    <AbsoluteFill style={{ opacity }}>
+      <TransitionSeries>
+        <TransitionSeries.Sequence durationInFrames={138}><Intro /></TransitionSeries.Sequence>
+        <TransitionSeries.Transition presentation={fade()} timing={linearTiming({ durationInFrames: 18 })} />
+        <TransitionSeries.Sequence durationInFrames={228}><Feature feature="browse" duration={228} /></TransitionSeries.Sequence>
+        <TransitionSeries.Transition presentation={slide({ direction: 'from-right' })} timing={linearTiming({ durationInFrames: 18 })} />
+        <TransitionSeries.Sequence durationInFrames={198}><Feature feature="memory" duration={198} /></TransitionSeries.Sequence>
+        <TransitionSeries.Transition presentation={fade()} timing={linearTiming({ durationInFrames: 18 })} />
+        <TransitionSeries.Sequence durationInFrames={228}><Feature feature="skills" duration={228} /></TransitionSeries.Sequence>
+        <TransitionSeries.Transition presentation={slide({ direction: 'from-bottom' })} timing={linearTiming({ durationInFrames: 18 })} />
+        <TransitionSeries.Sequence durationInFrames={198}><Feature feature="permissions" duration={198} /></TransitionSeries.Sequence>
+        <TransitionSeries.Transition presentation={fade()} timing={linearTiming({ durationInFrames: 18 })} />
+        <TransitionSeries.Sequence durationInFrames={180}><Outro /></TransitionSeries.Sequence>
+      </TransitionSeries>
+      <Header /><Subtitles />
+      <div className="movie-footer"><span>Open source. No API key.</span><span>Animated feature walkthrough</span></div>
+      <div className="movie-progress"><div style={{ width: `${frame / (duration - 1) * 100}%`, background: blue }} /></div>
+    </AbsoluteFill>
+    <Audio src={staticFile('assets/ambient.wav')} volume={.55} />
+  </AbsoluteFill>;
 }
