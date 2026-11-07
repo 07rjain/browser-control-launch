@@ -1,48 +1,112 @@
-import { useEffect, useRef, useState } from 'react';
-import { ArrowRight, ArrowUpRight, Brain, Check, ChevronDown, ChevronRight, Chrome, CirclePlay, Code2, Command, Download, Github, Globe2, Menu, MousePointer2, Play, ShieldCheck, Sparkles, WandSparkles, X } from 'lucide-react';
-import { DemoBrowser } from './components/DemoBrowser';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { ArrowRight, ArrowUpRight, Brain, Check, ChevronDown, Chrome, Download, Github, Menu, MousePointer2, Play, ShieldCheck, WandSparkles, X } from 'lucide-react';
+import { ProductPreview } from './components/ProductPreview';
 import { features, GITHUB_URL, PRIVACY_URL, STORE_URL, SUPPORT_URL } from './content';
 
-const featureIcons = [MousePointer2, Brain, WandSparkles, ShieldCheck];
-const faqs = [
-  ['What do I need to get started?', 'A current stable version of Chrome or Brave, Node.js 20 or newer, a compatible Codex CLI, an eligible ChatGPT/Codex account, and the free local Browser Control companion. The setup guide covers macOS, Windows, and Linux. Snap and Flatpak browsers are not supported.'],
-  ['Do I need an API key or another subscription?', 'Browser Control uses your eligible ChatGPT/Codex account through the official Codex interface. It does not ask for an API key. Your account’s usage limits apply; Auto review uses additional Codex usage.'],
-  ['How does auto permission work?', 'Choose between Ask every time, Auto review, and Full access. Auto review uses a separate reviewer model for eligible routine actions; risky or unclear actions still ask you. It does not grant site access. Full access requires an explicit site-access grant and can perform supported consequential actions after your request without another Browser Control confirmation. Activity, action limits, and Stop apply in every mode.'],
-  ['Where are my memories and skills stored?', 'Saved memories and taught skills live locally on this computer with the companion. Memory is opt-in, and you can view, edit, or delete it in Settings. Selected memories are sent to your Codex model when used. Incognito chats use neither saved memory nor local conversation history; provider and attachment retention still apply.'],
-  ['Is Browser Control open source?', 'Yes. Explore the source, report issues, and contribute on GitHub. Browser Control is an independent project and is not affiliated with or endorsed by OpenAI.'],
+const featureTabs = [
+  { label: 'Browse', icon: MousePointer2, title: 'A hand with the page you’re on.', description: 'Attach a page for context. Ask questions, organize tabs, and work through browser tasks in plain English.' },
+  { label: 'Memory', icon: Brain, title: 'A little less explaining, every time.', description: 'Opt in to save useful preferences across regular chats. View, edit, or forget them in Settings.' },
+  { label: 'Skills', icon: WandSparkles, title: 'Teach it your way of doing things.', description: 'Record a workflow, review the steps, and save a local skill for similar requests later.' },
+  { label: 'Control', icon: ShieldCheck, title: 'Your browser. Your rules.', description: 'Choose Ask every time, Auto review, or Full access. Follow the activity and stop any task.' },
 ];
 
-function InstallLink({ children, className = '' }: { children?: React.ReactNode; className?: string }) {
-  return <a className={`button primary ${className}`} href={STORE_URL} target="_blank" rel="noreferrer"><Chrome size={17} />{children || 'Add to Chrome'}<ArrowUpRight size={15} /></a>;
+const faqs = [
+  { question: 'What do I need to get started?', answer: 'A current stable version of Chrome or Brave, Node.js 20+, a compatible Codex CLI, the free local Browser Control companion, and an eligible ChatGPT/Codex account. The setup guide covers macOS, Windows, and Linux. Snap and Flatpak browsers are not supported.' },
+  { question: 'How do permissions and Auto review work?', answer: 'Ask every time uses exact-site access and confirmations for supported consequential actions. Auto review adds a separate model to review eligible routine actions; risky or unclear actions still ask you. Reviews use extra Codex usage and do not grant site access. Full access requires an explicit site-access grant and can perform supported consequential actions after your request without another Browser Control confirmation. Every mode keeps activity, action limits, and Stop available.' },
+  { question: 'Where do my data, memories, and skills go?', answer: 'Saved memories and recorded skills are stored locally with the companion. Memory is opt-in, and selected memories are sent to your Codex model when used. Page context is shared only when you attach it. Incognito chats use neither saved memory nor local conversation history; provider and attachment retention still apply. Browser Control has no publisher analytics or advertising.' },
+];
+
+function InstallLink() {
+  return <a className="button primary" href={STORE_URL} target="_blank" rel="noreferrer"><Chrome size={18} /> Add to Chrome <ArrowUpRight size={15} /></a>;
 }
 
 function VideoDialog({ onClose }: { onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
-  useEffect(() => { dialog.current?.showModal(); const el = dialog.current; const close = () => onClose(); el?.addEventListener('close', close); return () => el?.removeEventListener('close', close); }, [onClose]);
-  return <dialog ref={dialog} className="video-dialog" aria-label="Browser Control demo video" onClick={event => { if (event.target === dialog.current) onClose(); }}><div className="video-dialog-heading"><span><Play size={14} /> Browser Control, in 45 seconds</span><button onClick={onClose} aria-label="Close video"><X size={20} /></button></div><video src="/browser-control-demo.mp4" poster="/assets/video-poster.jpg" controls autoPlay playsInline preload="metadata"><track kind="captions" src="/demo-captions.vtt" srcLang="en" label="English" /></video><div className="video-dialog-footer"><span>Animated feature walkthrough · real extension screenshot included</span><a href="/browser-control-demo.mp4" download><Download size={13} /> Download video</a></div></dialog>;
+  useEffect(() => {
+    const element = dialog.current;
+    element?.showModal();
+    element?.addEventListener('close', onClose);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      element?.removeEventListener('close', onClose);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [onClose]);
+  return <dialog ref={dialog} className="video-dialog" aria-label="Browser Control demo video" onClick={event => { if (event.target === dialog.current) onClose(); }}>
+    <div className="video-dialog-heading"><span>Browser Control in 45 seconds</span><button onClick={onClose} aria-label="Close video"><X size={21} /></button></div>
+    <video src="/browser-control-demo.mp4" poster="/assets/video-poster.jpg" controls autoPlay playsInline preload="metadata"><track kind="captions" src="/demo-captions.vtt" srcLang="en" label="English" /></video>
+    <div className="video-dialog-footer"><span>Animated walkthrough, with an actual extension screenshot.</span><a href="/browser-control-demo.mp4" download><Download size={14} /> Download</a></div>
+  </dialog>;
 }
 
 export function App() {
   const [activeFeature, setActiveFeature] = useState(0);
   const [videoOpen, setVideoOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const openVideo = () => setVideoOpen(true);
+  const videoTrigger = useRef<HTMLButtonElement>(null);
+  const closeVideo = () => { setVideoOpen(false); videoTrigger.current?.focus(); };
+
+  function changeTab(event: KeyboardEvent<HTMLButtonElement>, index: number) {
+    let next: number;
+    if (event.key === 'ArrowRight') next = (index + 1) % features.length;
+    else if (event.key === 'ArrowLeft') next = (index + features.length - 1) % features.length;
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = features.length - 1;
+    else return;
+    event.preventDefault();
+    setActiveFeature(next);
+    document.getElementById(`tab-${features[next].id}`)?.focus();
+  }
+
   return <>
     <a className="skip-link" href="#main">Skip to content</a>
-    <div className="announcement"><span className="tiny-dot" /> An open-source sidekick. A more capable browser. <a href={GITHUB_URL} target="_blank" rel="noreferrer">Meet Browser Control <ArrowRight size={12} /></a></div>
-    <header className="site-header"><a className="brand" href="#" aria-label="Browser Control home"><img src="/icon.png" alt="" />browser<span>control</span><span className="brand-period">.</span></a><nav className={menuOpen ? 'nav-open' : ''} aria-label="Main navigation"><a href="#features" onClick={() => setMenuOpen(false)}>Features</a><a href="#how-it-works" onClick={() => setMenuOpen(false)}>How it works</a><a href={GITHUB_URL} target="_blank" rel="noreferrer"><Github size={14} /> GitHub <ArrowUpRight size={11} /></a></nav><InstallLink className="header-install" /><button className="mobile-menu" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X /> : <Menu />}</button></header>
+    <header className="site-header page-width">
+      <a className="brand" href="#" aria-label="Browser Control home"><img src="/icon.png" alt="" /> Browser Control</a>
+      <nav id="main-navigation" className={menuOpen ? 'nav-open' : ''} aria-label="Main navigation">
+        <a href="#features" onClick={() => setMenuOpen(false)}>Features</a>
+        <a href="#how-it-works" onClick={() => setMenuOpen(false)}>Setup</a>
+        <a className="github-link" href={GITHUB_URL} target="_blank" rel="noreferrer"><Github size={17} /> GitHub <ArrowUpRight size={13} /></a>
+      </nav>
+      <button className="mobile-menu" aria-controls="main-navigation" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X size={22} /> : <Menu size={22} />}</button>
+    </header>
+
     <main id="main">
-      <section className="hero page-width"><div className="hero-copy"><div className="eyebrow hero-eyebrow"><span className="tiny-dot" /> YOUR NEW FAVORITE EXTENSION</div><h1>Your browser.<br />Now with a little<br /><span className="superpower">superpower<svg viewBox="0 0 420 15" preserveAspectRatio="none" aria-hidden="true"><path d="M3 11 Q180 -2 415 8" /></svg></span><span className="hero-period">.</span></h1><p>Bring your ChatGPT brain into your browser.<br className="desktop-break" /> Chat, remember, and get things done —<br className="desktop-break" /> right beside the page you’re on.</p><div className="hero-actions"><InstallLink /><button className="button text-button" onClick={openVideo}><CirclePlay size={19} /> Watch the demo <span className="duration">0:45</span></button></div><div className="hero-reassurance"><span><Check size={12} /> Open source</span><span><Check size={12} /> No API key</span><span><Check size={12} /> Your ChatGPT/Codex account</span></div><a className="setup-note" href="#how-it-works">Requires the free local companion <ArrowUpRight size={11} /></a></div>
-        <div className="hero-visual"><div className="visual-topline"><span><span className="tiny-dot" /> A LITTLE LESS CLICKING. A LOT MORE DOING.</span><span>01 / 04</span></div><div className="hero-demo-wrap"><DemoBrowser onNext={() => { setActiveFeature(1); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); }} /><div className="floating-toast"><span><Check size={14} /></span><div>A little busywork, handled.<small>You take it from here.</small></div><Sparkles size={16} /></div></div><div className="visual-caption"><span><Command size={12} /> Works where you already work.</span><span>Illustrative product preview <ArrowUpRight size={12} /></span></div></div>
+      <section className="hero page-width" aria-labelledby="hero-title">
+        <a className="product-label" href={GITHUB_URL} target="_blank" rel="noreferrer"><span /> An open-source Chrome extension <ArrowUpRight size={12} /></a>
+        <h1 id="hero-title">ChatGPT, right beside<br className="hero-break" /> <span>the page you’re on.</span></h1>
+        <p className="hero-description">Ask about a page. Remember what matters.<br className="hero-break" /> Turn everyday browser tasks into a conversation.</p>
+        <div className="hero-actions"><InstallLink /><button ref={videoTrigger} className="button secondary" onClick={() => setVideoOpen(true)}><Play size={16} /> Watch the demo <span>45 sec</span></button></div>
+        <p className="hero-requirements">Uses your ChatGPT/Codex account. <a href="#how-it-works">Free local companion required <ArrowRight size={12} /></a></p>
       </section>
-      <div className="platform-strip page-width"><span>A familiar browser.<br /><strong>A whole new flow.</strong></span><div><Chrome /><span>Built for Chrome<span className="small-dot">·</span>Also works with Brave</span></div><div><Globe2 /><span>macOS <span className="small-dot">/</span> Windows <span className="small-dot">/</span> Linux</span></div><a href={GITHUB_URL} target="_blank" rel="noreferrer"><Code2 /><span>Open source. Open possibilities.</span><ArrowUpRight size={14} /></a></div>
-      <section className="features-section page-width" id="features"><div className="section-heading"><div><div className="eyebrow">MORE THAN ANOTHER CHAT WINDOW</div><h2>A sidekick that<br /><span>gets your workflow.</span></h2></div><p>A bit of context. A little memory. Fewer repetitive clicks.<br />Everything you need to make the web work for you.</p></div><div className="feature-layout"><div className="feature-selector" role="tablist" aria-label="Explore features">{features.map((feature, index) => { const Icon = featureIcons[index]; return <button role="tab" aria-label={feature.label} id={`tab-${feature.id}`} aria-selected={activeFeature === index} aria-controls="feature-panel" tabIndex={activeFeature === index ? 0 : -1} className={`feature-tab ${activeFeature === index ? 'active' : ''}`} key={feature.id} onClick={() => setActiveFeature(index)} onKeyDown={event => { let next = index; if (event.key === 'ArrowDown' || event.key === 'ArrowRight') next = (index + 1) % features.length; else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') next = (index + features.length - 1) % features.length; else if (event.key === 'Home') next = 0; else if (event.key === 'End') next = features.length - 1; else return; event.preventDefault(); setActiveFeature(next); document.getElementById(`tab-${features[next].id}`)?.focus(); }}><div><Icon size={20} /><span>{feature.label}</span><ChevronRight size={17} /></div><p>{feature.description}</p></button>; })}</div><div className="feature-stage" role="tabpanel" id="feature-panel" aria-labelledby={`tab-${features[activeFeature].id}`} tabIndex={0}><div className="stage-topline"><span>THE LITTLE THINGS ADD UP.</span><span>0{activeFeature + 1}</span></div><div className="feature-mobile-copy"><h3>{features[activeFeature].title}</h3><p>{features[activeFeature].description}</p></div><DemoBrowser feature={features[activeFeature].id} onNext={() => setActiveFeature((activeFeature + 1) % 4)} /><div className="stage-caption"><span>{features[activeFeature].title}</span><span>Interactive preview <MousePointer2 size={12} /></span></div></div></div></section>
-      <section className="demo-section page-width"><div className="demo-section-copy"><div className="eyebrow"><span className="tiny-dot" /> MEET YOUR NEW FLOW</div><h2>Less back and forth.<br />More <span>“already done.”</span></h2><p>See how page context, memory, and skills<br />come together in one small side panel.</p><button className="button light-button" onClick={openVideo}><Play size={14} fill="currentColor" /> Watch the 45-second demo <ArrowRight size={15} /></button><span className="video-style-note">A captioned, animated product walkthrough.</span></div><button className="video-preview" onClick={openVideo} aria-label="Play the 45-second Browser Control demo"><img src="/assets/video-poster.jpg" alt="Preview of the Browser Control launch video" loading="lazy" /><span className="video-play"><Play size={23} fill="currentColor" /></span><span className="video-time">0:45</span></button></section>
-      <section className="setup-section page-width" id="how-it-works"><div className="section-heading"><div><div className="eyebrow">SMALL SETUP. BIG POSSIBILITIES.</div><h2>Make yourself<br /><span>right at home.</span></h2></div><a className="inline-link" href={SUPPORT_URL} target="_blank" rel="noreferrer">Open the full setup guide <ArrowUpRight size={15} /></a></div><div className="setup-steps"><article><span className="step-number">01</span><Chrome size={25} /><h3>Add it to your browser.</h3><p>Install Browser Control from the Chrome Web Store. Pin it for easy access.</p><a href={STORE_URL} target="_blank" rel="noreferrer">Get the extension <ArrowUpRight size={13} /></a></article><article><span className="step-number">02</span><Download size={25} /><h3>Connect the companion.</h3><p>Install the free local companion, Node.js 20+, and a compatible Codex CLI using the setup guide.</p><a href={SUPPORT_URL} target="_blank" rel="noreferrer">Get the companion <ArrowUpRight size={13} /></a></article><article><span className="step-number">03</span><Sparkles size={25} /><h3>Say hello to your sidekick.</h3><p>Open the side panel, sign in with your eligible ChatGPT/Codex account, and start a conversation.</p><a href={SUPPORT_URL} target="_blank" rel="noreferrer">First-time setup <ArrowUpRight size={13} /></a></article></div><p className="setup-footnote"><ShieldCheck size={13} /> The companion runs locally. No API key. No publisher analytics or advertising.</p></section>
-      <section className="faq-section page-width"><div><div className="eyebrow">A FEW GOOD QUESTIONS</div><h2>Curious?<br /><span>Good.</span></h2><p>Here are the things you might<br />want to know before you dive in.</p><a className="inline-link" href={SUPPORT_URL} target="_blank" rel="noreferrer">More help, right here <ArrowUpRight size={14} /></a></div><div className="faq-list">{faqs.map(([question, answer]) => <details key={question}><summary>{question}<ChevronDown size={16} /></summary><p>{answer}</p></details>)}</div></section>
-      <section className="final-cta page-width"><div className="cta-orbit" aria-hidden="true"><MousePointer2 size={36} /><Sparkles size={21} /></div><div className="eyebrow">SAME BROWSER. NEW POSSIBILITIES.</div><h2>A little help.<br /><span>A lot more possible.</span></h2><p>Your next great workflow starts with a side panel.</p><InstallLink>Give your browser a superpower</InstallLink><span className="cta-note">Open source. Built for your everyday.</span></section>
+
+      <section className="feature-explorer page-width" id="features" aria-label="Explore Browser Control features">
+        <div className="feature-tabs" role="tablist" aria-label="Explore features">
+          {featureTabs.map((tab, index) => { const Icon = tab.icon; const feature = features[index]; return <button key={feature.id} type="button" role="tab" id={`tab-${feature.id}`} aria-label={feature.label} aria-selected={activeFeature === index} aria-controls="feature-panel" tabIndex={activeFeature === index ? 0 : -1} onClick={() => setActiveFeature(index)} onKeyDown={event => changeTab(event, index)}><Icon size={17} /><span>{tab.label}</span></button>; })}
+        </div>
+        <div className="feature-panel" id="feature-panel" role="tabpanel" aria-labelledby={`tab-${features[activeFeature].id}`} tabIndex={0}>
+          <ProductPreview feature={features[activeFeature].id} />
+          <div className="feature-description"><div><h2>{featureTabs[activeFeature].title}</h2><p>{featureTabs[activeFeature].description}</p></div><span className="preview-label">Illustrative preview</span></div>
+        </div>
+        <div className="compatibility"><span><Check size={14} /> Chrome & Brave</span><span><Check size={14} /> macOS, Windows & Linux</span><span><Check size={14} /> No API key</span></div>
+      </section>
+
+      <section className="setup-section page-width" id="how-it-works" aria-labelledby="setup-title">
+        <div className="section-heading"><div><span className="section-label">Getting started</span><h2 id="setup-title">Three steps. Then you’re in.</h2></div><a className="inline-link" href={SUPPORT_URL} target="_blank" rel="noreferrer">Full setup guide <ArrowUpRight size={15} /></a></div>
+        <ol className="setup-steps">
+          <li><span className="step-number">1</span><div><h3>Add the extension</h3><p>Install Browser Control from the Chrome Web Store.</p><a href={STORE_URL} target="_blank" rel="noreferrer">Add to Chrome <ArrowUpRight size={13} /></a></div></li>
+          <li><span className="step-number">2</span><div><h3>Install the companion</h3><p>Connect Chrome to Codex locally. The guide covers the prerequisites.</p><a href={SUPPORT_URL} target="_blank" rel="noreferrer">Installation guide <ArrowUpRight size={13} /></a></div></li>
+          <li><span className="step-number">3</span><div><h3>Sign in and start chatting</h3><p>Open the side panel and sign in with your eligible ChatGPT/Codex account.</p><span className="step-note">You’re ready to go <Check size={13} /></span></div></li>
+        </ol>
+      </section>
+
+      <section className="faq-section page-width" aria-labelledby="faq-title">
+        <div className="faq-heading"><h2 id="faq-title">A few useful details.</h2><a className="inline-link" href={SUPPORT_URL} target="_blank" rel="noreferrer">Need a hand? <ArrowUpRight size={14} /></a></div>
+        <div className="faq-list">{faqs.map(({ question, answer }) => <details key={question}><summary>{question}<ChevronDown size={17} /></summary><p>{answer}</p></details>)}</div>
+      </section>
     </main>
-    <footer className="site-footer page-width"><div><a className="brand" href="#"><img src="/icon.png" alt="" />browser<span>control</span><span className="brand-period">.</span></a><p>An independent, open-source project.<br />Not affiliated with or endorsed by OpenAI.</p></div><div className="footer-links"><a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={11} /></a><a href={SUPPORT_URL} target="_blank" rel="noreferrer">Support</a><a href={PRIVACY_URL} target="_blank" rel="noreferrer">Privacy</a></div><span className="footer-signoff">Made for a more human web. <span>↗</span></span></footer>
-    {videoOpen && <VideoDialog onClose={() => setVideoOpen(false)} />}
+
+    <footer className="site-footer page-width"><div><a className="footer-brand" href="#">Browser Control</a><p>Independent and open source. Not affiliated with OpenAI.</p></div><div className="footer-links"><a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a><a href={SUPPORT_URL} target="_blank" rel="noreferrer">Support</a><a href={PRIVACY_URL} target="_blank" rel="noreferrer">Privacy</a></div></footer>
+    {videoOpen && <VideoDialog onClose={closeVideo} />}
   </>;
 }

@@ -19,6 +19,8 @@ try {
   await page.evaluate(() => document.fonts.ready);
   assert.equal(await page.locator('h1').count(), 1);
   assert.match(await page.title(), /Browser Control/);
+  assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor), 'rgb(255, 255, 255)');
+  assert.ok(await page.evaluate(() => document.documentElement.scrollHeight < 2600), 'Keep the desktop page compact');
   for (const [label, content] of [
     ['Memory', 'prefers quiet places'],
     ['Reusable skills', 'Weekly research'],
@@ -30,6 +32,11 @@ try {
     assert.equal(await tab.getAttribute('aria-selected'), 'true');
     assert.match((await page.getByRole('tabpanel').textContent()).toLowerCase(), new RegExp(content.toLowerCase()));
   }
+  await page.getByRole('tab', { name: 'You’re in control', exact: true }).click();
+  const fullAccessExample = page.getByRole('button', { name: /Full access/ });
+  await fullAccessExample.click();
+  assert.equal(await fullAccessExample.getAttribute('aria-pressed'), 'true');
+  assert.equal(await page.getByRole('button', { name: /Auto review/ }).getAttribute('aria-pressed'), 'false');
   await page.getByRole('tab', { name: 'Browser actions', exact: true }).focus();
   await page.keyboard.press('ArrowRight');
   assert.equal(await page.getByRole('tab', { name: 'Memory', exact: true }).getAttribute('aria-selected'), 'true');
@@ -38,7 +45,9 @@ try {
   await question.click();
   assert.equal(await question.locator('..').getAttribute('open'), '');
   await question.click();
-  for (const link of await page.getByRole('link', { name: /Add to Chrome|Give your browser a superpower/ }).all()) {
+  const installLinks = await page.getByRole('link', { name: /Add to Chrome/ }).all();
+  assert.equal(installLinks.length, 2);
+  for (const link of installLinks) {
     assert.match(await link.getAttribute('href'), /mpdfhhhjgbpdpfnkjbnboebdjokfjglf/);
   }
   await page.getByRole('button', { name: /Watch the demo/ }).click();
@@ -50,12 +59,19 @@ try {
   assert.equal(media.height, 1080);
   await page.keyboard.press('Escape');
   assert.equal(await page.getByRole('dialog').count(), 0);
+  await page.waitForFunction(() => document.body.style.overflow !== 'hidden');
+  assert.equal(await page.getByRole('button', { name: /Watch the demo/ }).evaluate(button => document.activeElement === button), true);
+  assert.notEqual(await page.evaluate(() => document.body.style.overflow), 'hidden');
   await page.evaluate(() => scrollTo(0, 0));
   await page.screenshot({ path: 'out/verification/desktop.png', fullPage: true });
   for (const width of [320, 360, 390, 540, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: 844 });
     const dimensions = await page.evaluate(() => ({ actual: document.documentElement.scrollWidth, viewport: innerWidth }));
     assert.ok(dimensions.actual <= width, `Horizontal overflow at ${width}px: ${JSON.stringify(dimensions)}`);
+    for (const label of ['Memory', 'Reusable skills', 'You’re in control', 'Browser actions']) {
+      await page.getByRole('tab', { name: label, exact: true }).click();
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${label} overflows at ${width}px`);
+    }
   }
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole('button', { name: 'Open navigation' }).click();

@@ -11,7 +11,7 @@ npm install
 npm run dev
 ```
 
-Open the address Vite prints. The finished film is already included at `public/browser-control-demo.mp4`; both website video buttons play it in a keyboard-accessible dialog.
+Open the address Vite prints. The finished film is already included at `public/browser-control-demo.mp4`; the website's demo button plays it in a keyboard-accessible dialog.
 
 ```sh
 npm run build     # Strict TypeScript check, then production website in dist/
@@ -33,7 +33,9 @@ npm run build         # Copy the latest video and poster to dist/
 
 The first Remotion command downloads its Chrome Headless Shell. Linux requires Chrome's standard runtime libraries. The render uses two workers to keep memory use modest.
 
-Video source: `src/video/LaunchFilm.tsx`; motion/layout: `src/video/video.css`; duration and resolution: `src/video/Root.tsx`. The site and film share `src/components/DemoBrowser.tsx` and the feature copy in `src/content.ts`.
+Video source: `src/video/LaunchFilm.tsx`; motion/layout: `src/video/video.css`; duration and resolution: `src/video/Root.tsx`. The film uses `src/components/DemoBrowser.tsx`. The website has a separate light-theme preview in `src/components/ProductPreview.tsx`; both use the feature examples in `src/content.ts`.
+
+The website uses a compact light layout: one hero, an accessible four-tab feature explorer, three installation steps, and three expandable questions. On phones, the explorer focuses on the assistant panel. Permission choices in the preview change the example only.
 
 | Time | Scene |
 | --- | --- |
