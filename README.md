@@ -2,7 +2,7 @@
 
 A responsive React/TypeScript launch site and an editable 45-second, 1920×1080, 30 fps Remotion film for [Browser Control](https://chromewebstore.google.com/detail/browser-control/mpdfhhhjgbpdpfnkjbnboebdjokfjglf).
 
-Live website: **https://browser-control-launch.vercel.app**. The Vercel project is connected to this GitHub repository; pushes to `main` deploy to production automatically.
+Live website: **https://browser-control.subdomain.wtf**. The Vercel fallback is https://browser-control-launch.vercel.app. The Vercel project is connected to this GitHub repository; pushes to `main` deploy to production automatically.
 
 ## Run the website
 
@@ -75,4 +75,4 @@ Product claims were checked against the public Chrome Web Store description and 
 - Interface icons: Lucide, ISC license.
 - Abstract Kyoto landscape: original CSS illustration; the example site and travel task are fictional.
 
-The copy explains the separate local companion and eligible account requirements. It distinguishes Auto review from Full access, says memory is opt-in and local, and links the official privacy policy and support guide. No publisher analytics, form backend, fabricated testimonials, or usage metrics were added. The site is deployed on Vercel; a custom domain is not configured.
+The copy explains the separate local companion and eligible account requirements. It distinguishes Auto review from Full access, says memory is opt-in and local, and links the official privacy policy and support guide. No publisher analytics, form backend, fabricated testimonials, or usage metrics were added. The site is deployed on Vercel with the custom domain `browser-control.subdomain.wtf`.
