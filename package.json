@@ -1,0 +1,33 @@
+{
+  "name": "browser-control-launch",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "video:studio": "remotion studio src/video/index.ts",
+    "video:render": "remotion render src/video/index.ts BrowserControl public/browser-control-demo.mp4 --codec h264 --crf 18 --concurrency 2",
+    "video:poster": "remotion still src/video/index.ts BrowserControl public/assets/video-poster.jpg --frame 370",
+    "verify": "node scripts/verify.mjs",
+    "export:preview": "npm run build && node scripts/export-preview.mjs"
+  },
+  "dependencies": {
+    "@fontsource/dm-sans": "^5.2.8",
+    "@remotion/cli": "4.0.541",
+    "@remotion/player": "4.0.541",
+    "lucide-react": "^0.468.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "remotion": "4.0.541"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.4",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.2"
+  }
+}
