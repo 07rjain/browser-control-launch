@@ -20,7 +20,7 @@ try {
   await page.evaluate(() => document.fonts.ready);
   assert.equal(await page.locator('h1').count(), 1);
   assert.match(await page.title(), /Browser Control/);
-  assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor), 'rgb(255, 255, 255)');
+  assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor), 'rgb(253, 247, 253)');
   assert.ok(await page.evaluate(() => document.documentElement.scrollHeight < 2600), 'Keep the desktop page compact');
   for (const [label, content] of [
     ['Memory', 'prefers quiet places'],

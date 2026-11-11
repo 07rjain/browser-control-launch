@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { ArrowRight, ArrowUpRight, Brain, Check, ChevronDown, Chrome, Download, Github, Menu, MousePointer2, Play, ShieldCheck, WandSparkles, X } from 'lucide-react';
 import { ProductPreview } from './components/ProductPreview';
+import { RoutingArt } from './components/RoutingArt';
 import { features, GITHUB_URL, PRIVACY_URL, STORE_URL, SUPPORT_URL } from './content';
 import videoMetadata from './video/metadata.json';
 
@@ -60,7 +61,7 @@ export function App() {
     document.getElementById(`tab-${features[next].id}`)?.focus();
   }
 
-  return <>
+  return <div className="launch-page">
     <a className="skip-link" href="#main">Skip to content</a>
     <header className="site-header page-width">
       <a className="brand" href="#" aria-label="Browser Control home"><img src="/icon.png" alt="" /> Browser Control</a>
@@ -73,24 +74,27 @@ export function App() {
     </header>
 
     <main id="main">
-      <section className="hero page-width" aria-labelledby="hero-title">
-        <a className="product-label" href={GITHUB_URL} target="_blank" rel="noreferrer"><span /> An open-source Chrome extension <ArrowUpRight size={12} /></a>
-        <h1 id="hero-title">ChatGPT, right beside<br className="hero-break" /> <span>the page you’re on.</span></h1>
-        <p className="hero-description">Ask about a page. Remember what matters.<br className="hero-break" /> Turn everyday browser tasks into a conversation.</p>
-        <div className="hero-actions"><InstallLink /><button ref={videoTrigger} className="button secondary" onClick={() => setVideoOpen(true)}><Play size={16} /> Watch the demo <span>{videoMetadata.durationSeconds} sec</span></button></div>
-        <p className="hero-requirements">Uses your ChatGPT/Codex account. <a href="#how-it-works">Free local companion required <ArrowRight size={12} /></a></p>
-      </section>
+      <div className="hero-stage">
+        <RoutingArt signal={activeFeature} />
+        <section className="hero page-width" aria-labelledby="hero-title">
+          <a className="product-label" href={GITHUB_URL} target="_blank" rel="noreferrer"><span /> An open-source Chrome extension <ArrowUpRight size={12} /></a>
+          <h1 id="hero-title">ChatGPT, right beside<br className="hero-break" /> <span>the page you’re on.</span></h1>
+          <p className="hero-description">Ask about a page. Remember what matters.<br className="hero-break" /> Turn everyday browser tasks into a conversation.</p>
+          <div className="hero-actions"><InstallLink /><button ref={videoTrigger} className="button secondary" onClick={() => setVideoOpen(true)}><Play size={16} /> Watch the demo <span>{videoMetadata.durationSeconds} sec</span></button></div>
+          <p className="hero-requirements">Uses your ChatGPT/Codex account. <a href="#how-it-works">Free local companion required <ArrowRight size={12} /></a></p>
+        </section>
 
-      <section className="feature-explorer page-width" id="features" aria-label="Explore Browser Control features">
-        <div className="feature-tabs" role="tablist" aria-label="Explore features">
-          {featureTabs.map((tab, index) => { const Icon = tab.icon; const feature = features[index]; return <button key={feature.id} type="button" role="tab" id={`tab-${feature.id}`} aria-label={feature.label} aria-selected={activeFeature === index} aria-controls="feature-panel" tabIndex={activeFeature === index ? 0 : -1} onClick={() => setActiveFeature(index)} onKeyDown={event => changeTab(event, index)}><Icon size={17} /><span>{tab.label}</span></button>; })}
-        </div>
-        <div className="feature-panel" id="feature-panel" role="tabpanel" aria-labelledby={`tab-${features[activeFeature].id}`} tabIndex={0}>
-          <ProductPreview feature={features[activeFeature].id} />
-          <div className="feature-description"><div><h2>{featureTabs[activeFeature].title}</h2><p>{featureTabs[activeFeature].description}</p></div><span className="preview-label">Illustrative preview</span></div>
-        </div>
-        <div className="compatibility"><span><Check size={14} /> Chrome & Brave</span><span><Check size={14} /> macOS, Windows & Linux</span><span><Check size={14} /> No API key</span></div>
-      </section>
+        <section className="feature-explorer page-width" id="features" aria-label="Explore Browser Control features">
+          <div className="feature-tabs" role="tablist" aria-label="Explore features">
+            {featureTabs.map((tab, index) => { const Icon = tab.icon; const feature = features[index]; return <button key={feature.id} type="button" role="tab" id={`tab-${feature.id}`} aria-label={feature.label} aria-selected={activeFeature === index} aria-controls="feature-panel" tabIndex={activeFeature === index ? 0 : -1} onClick={() => setActiveFeature(index)} onKeyDown={event => changeTab(event, index)}><Icon size={17} /><span>{tab.label}</span></button>; })}
+          </div>
+          <div className="preview-surround"><div className="feature-panel" id="feature-panel" role="tabpanel" aria-labelledby={`tab-${features[activeFeature].id}`} tabIndex={0}>
+            <ProductPreview feature={features[activeFeature].id} />
+            <div className="feature-description"><div><h2>{featureTabs[activeFeature].title}</h2><p>{featureTabs[activeFeature].description}</p></div><span className="preview-label">Illustrative preview</span></div>
+          </div></div>
+          <div className="compatibility"><span><Check size={14} /> Chrome & Brave</span><span><Check size={14} /> macOS, Windows & Linux</span><span><Check size={14} /> No API key</span></div>
+        </section>
+      </div>
 
       <section className="setup-section page-width" id="how-it-works" aria-labelledby="setup-title">
         <div className="section-heading"><div><span className="section-label">Getting started</span><h2 id="setup-title">Three steps. Then you’re in.</h2></div><a className="inline-link" href={SUPPORT_URL} target="_blank" rel="noreferrer">Full setup guide <ArrowUpRight size={15} /></a></div>
@@ -109,5 +113,5 @@ export function App() {
 
     <footer className="site-footer page-width"><div><a className="footer-brand" href="#">Browser Control</a><p>Independent and open source. Not affiliated with OpenAI.</p></div><div className="footer-links"><a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a><a href={SUPPORT_URL} target="_blank" rel="noreferrer">Support</a><a href={PRIVACY_URL} target="_blank" rel="noreferrer">Privacy</a></div></footer>
     {videoOpen && <VideoDialog onClose={closeVideo} />}
-  </>;
+  </div>;
 }

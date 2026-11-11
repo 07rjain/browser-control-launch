@@ -35,7 +35,9 @@ The first Remotion command downloads its Chrome Headless Shell. Linux requires C
 
 Video source: `src/video/LaunchFilm.tsx`; motion/layout: `src/video/video.css`; duration and resolution: `src/video/metadata.json`. Both the film and website use the light-theme `src/components/ProductPreview.tsx` and feature examples in `src/content.ts`. The film adds spring entrances, typed prompts, staged results, cursor clicks, and fade/slide transitions using `@remotion/transitions`.
 
-The website uses a compact light layout: one hero, an accessible four-tab feature explorer, three installation steps, and three expandable questions. On phones, the explorer focuses on the assistant panel. Permission choices in the preview change the example only.
+The website uses a compact light layout with T3 Chat’s blush, plum, and rose palette: one hero, an accessible four-tab feature explorer, three installation steps, and three expandable questions. On phones, the explorer focuses on the assistant panel. Permission choices in the preview change the example only.
+
+`src/launch-theme.css` styles the website independently from the video. The hero’s seeded routing curves are generated in `src/art/quietRouting.ts` and rendered as a lightweight SVG by `RoutingArt.tsx`. They briefly trace on entry or feature selection, then settle; reduced motion hides the trace. The standalone p5.js study in `design/quiet-routing.html` exposes seeds, spacing, curvature, color, and PNG export. Its p5.js and font CDN links require internet access. Design direction and the algorithmic philosophy are recorded alongside it.
 
 | Time | Scene |
 | --- | --- |
