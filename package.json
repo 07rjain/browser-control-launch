@@ -19,6 +19,7 @@
     "@remotion/cli": "4.0.541",
     "@remotion/player": "4.0.541",
     "@remotion/transitions": "4.0.541",
+    "@vercel/analytics": "^2.0.1",
     "lucide-react": "^0.468.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
