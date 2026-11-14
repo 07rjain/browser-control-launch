@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { ArrowRight, ArrowUpRight, Brain, Check, ChevronDown, Chrome, Download, Github, Menu, MousePointer2, Play, ShieldCheck, WandSparkles, X } from 'lucide-react';
 import { ProductPreview } from './components/ProductPreview';
 import { RoutingArt } from './components/RoutingArt';
-import { features, GITHUB_URL, PRIVACY_URL, STORE_URL, SUPPORT_URL } from './content';
+import { CREATOR_CALENDAR_URL, CREATOR_EMAIL, CREATOR_WEBSITE_URL, features, GITHUB_URL, PRIVACY_URL, STORE_URL, SUPPORT_URL } from './content';
 import videoMetadata from './video/metadata.json';
 
 const featureTabs = [
@@ -15,7 +15,7 @@ const featureTabs = [
 const faqs = [
   { question: 'What do I need to get started?', answer: 'A current stable version of Chrome or Brave, Node.js 20+, a compatible Codex CLI, the free local Browser Control companion, and an eligible ChatGPT/Codex account. The setup guide covers macOS, Windows, and Linux. Snap and Flatpak browsers are not supported.' },
   { question: 'How do permissions and Auto review work?', answer: 'Ask every time uses exact-site access and confirmations for supported consequential actions. Auto review adds a separate model to review eligible routine actions; risky or unclear actions still ask you. Reviews use extra Codex usage and do not grant site access. Full access requires an explicit site-access grant and can perform supported consequential actions after your request without another Browser Control confirmation. Every mode keeps activity, action limits, and Stop available.' },
-  { question: 'Where do my data, memories, and skills go?', answer: 'Saved memories and recorded skills are stored locally with the companion. Memory is opt-in, and selected memories are sent to your Codex model when used. Page context is shared only when you attach it. Incognito chats use neither saved memory nor local conversation history; provider and attachment retention still apply. The extension has no publisher analytics or advertising. This website uses Vercel Web Analytics to measure visits.' },
+  { question: 'Where do my data, memories, and skills go?', answer: 'Saved memories and recorded skills are stored locally with the companion. Memory is opt-in, and selected memories are sent to your Codex model when used. Attached pages and browser-tool results are sent to hosted Codex when used. Incognito chats use neither saved memory nor local conversation history; provider and attachment retention still apply. The extension has no publisher analytics or advertising. This website uses Vercel Web Analytics to measure visits and Speed Insights to measure performance.' },
 ];
 
 function InstallLink() {
@@ -78,15 +78,15 @@ export function App() {
         <RoutingArt signal={activeFeature} />
         <section className="hero page-width" aria-labelledby="hero-title">
           <a className="product-label" href={GITHUB_URL} target="_blank" rel="noreferrer"><span /> An open-source Chrome extension <ArrowUpRight size={12} /></a>
-          <h1 id="hero-title">ChatGPT, right beside<br className="hero-break" /> <span>the page you’re on.</span></h1>
-          <p className="hero-description">Ask about a page. Remember what matters.<br className="hero-break" /> Turn everyday browser tasks into a conversation.</p>
+          <h1 id="hero-title">An AI browser assistant<br className="hero-break" /> <span>you can teach.</span></h1>
+          <p className="hero-description">Ask about a page. Organize your tabs.<br className="hero-break" /> Teach a workflow you want to use again.</p>
           <div className="hero-actions"><InstallLink /><button ref={videoTrigger} className="button secondary" onClick={() => setVideoOpen(true)}><Play size={16} /> Watch the demo <span>{videoMetadata.durationSeconds} sec</span></button></div>
           <p className="hero-requirements">Uses your ChatGPT/Codex account. <a href="#how-it-works">Free local companion required <ArrowRight size={12} /></a></p>
         </section>
 
         <section className="feature-explorer page-width" id="features" aria-label="Explore Browser Control features">
           <div className="feature-tabs" role="tablist" aria-label="Explore features">
-            {featureTabs.map((tab, index) => { const Icon = tab.icon; const feature = features[index]; return <button key={feature.id} type="button" role="tab" id={`tab-${feature.id}`} aria-label={feature.label} aria-selected={activeFeature === index} aria-controls="feature-panel" tabIndex={activeFeature === index ? 0 : -1} onClick={() => setActiveFeature(index)} onKeyDown={event => changeTab(event, index)}><Icon size={17} /><span>{tab.label}</span></button>; })}
+            {featureTabs.map((tab, index) => { const Icon = tab.icon; const feature = features[index]; return <button key={feature.id} type="button" role="tab" id={`tab-${feature.id}`} aria-label={tab.label} aria-selected={activeFeature === index} aria-controls="feature-panel" tabIndex={activeFeature === index ? 0 : -1} onClick={() => setActiveFeature(index)} onKeyDown={event => changeTab(event, index)}><Icon size={17} /><span>{tab.label}</span></button>; })}
           </div>
           <div className="preview-surround"><div className="feature-panel" id="feature-panel" role="tabpanel" aria-labelledby={`tab-${features[activeFeature].id}`} tabIndex={0}>
             <ProductPreview feature={features[activeFeature].id} />
@@ -97,12 +97,13 @@ export function App() {
       </div>
 
       <section className="setup-section page-width" id="how-it-works" aria-labelledby="setup-title">
-        <div className="section-heading"><div><span className="section-label">Getting started</span><h2 id="setup-title">Three steps. Then you’re in.</h2></div><a className="inline-link" href={SUPPORT_URL} target="_blank" rel="noreferrer">Full setup guide <ArrowUpRight size={15} /></a></div>
+        <div className="section-heading"><div><span className="section-label">Getting started</span><h2 id="setup-title">From setup to your first reply.</h2></div><a className="inline-link" href={SUPPORT_URL} target="_blank" rel="noreferrer">Full setup guide <ArrowUpRight size={15} /></a></div>
         <ol className="setup-steps">
           <li><span className="step-number">1</span><div><h3>Add the extension</h3><p>Install Browser Control from the Chrome Web Store.</p><a href={STORE_URL} target="_blank" rel="noreferrer">Add to Chrome <ArrowUpRight size={13} /></a></div></li>
-          <li><span className="step-number">2</span><div><h3>Install the companion</h3><p>Connect Chrome to Codex locally. The guide covers the prerequisites.</p><a href={SUPPORT_URL} target="_blank" rel="noreferrer">Installation guide <ArrowUpRight size={13} /></a></div></li>
-          <li><span className="step-number">3</span><div><h3>Sign in and start chatting</h3><p>Open the side panel and sign in with your eligible ChatGPT/Codex account.</p><span className="step-note">You’re ready to go <Check size={13} /></span></div></li>
+          <li><span className="step-number">2</span><div><h3>Install the companion</h3><p>Requires Node.js 20+ and a compatible Codex CLI. Install the free companion for your computer.</p><a href={SUPPORT_URL} target="_blank" rel="noreferrer">Installation guide <ArrowUpRight size={13} /></a></div></li>
+          <li><span className="step-number">3</span><div><h3>Sign in and start chatting</h3><p>Open the side panel and sign in with your eligible ChatGPT/Codex account.</p><span className="step-note">Attach a page and ask for a one-sentence summary.</span></div></li>
         </ol>
+        <p className="setup-platforms">Choose your setup guide: <a href={`${SUPPORT_URL}#macos`} target="_blank" rel="noreferrer">macOS</a><a href={`${SUPPORT_URL}#windows`} target="_blank" rel="noreferrer">Windows</a><a href={`${SUPPORT_URL}#linux`} target="_blank" rel="noreferrer">Linux</a></p>
       </section>
 
       <section className="faq-section page-width" aria-labelledby="faq-title">
@@ -111,7 +112,13 @@ export function App() {
       </section>
     </main>
 
-    <footer className="site-footer page-width"><div><a className="footer-brand" href="#">Browser Control</a><p>Independent and open source. Not affiliated with OpenAI.</p></div><div className="footer-links"><a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a><a href={SUPPORT_URL} target="_blank" rel="noreferrer">Support</a><a href={PRIVACY_URL} target="_blank" rel="noreferrer">Privacy</a></div></footer>
+    <footer className="site-footer page-width">
+      <div><a className="footer-brand" href="#">Browser Control</a><p>Independent and open source. Not affiliated with OpenAI.</p></div>
+      <div className="footer-link-groups">
+        <nav className="footer-links" aria-label="Product links"><a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a><a href={SUPPORT_URL} target="_blank" rel="noreferrer">Support</a><a href={PRIVACY_URL} target="_blank" rel="noreferrer">Privacy</a></nav>
+        <nav className="footer-links" aria-label="Contact Rishabh"><a href={CREATOR_CALENDAR_URL} target="_blank" rel="noreferrer">Book a call</a><a href={CREATOR_WEBSITE_URL} target="_blank" rel="noreferrer">Rishabh’s website</a><a href={`mailto:${CREATOR_EMAIL}`}>{CREATOR_EMAIL}</a></nav>
+      </div>
+    </footer>
     {videoOpen && <VideoDialog onClose={closeVideo} />}
   </div>;
 }

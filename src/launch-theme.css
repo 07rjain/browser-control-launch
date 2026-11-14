@@ -99,3 +99,12 @@
   .launch-page .setup-section { padding-top: 49px; }
 }
 @media (prefers-reduced-motion: reduce) { .routing-signals { display: none; } }
+
+.setup-platforms { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin: 22px 0 0; color: var(--launch-muted); font-size: 14px; }
+.setup-platforms a { color: var(--ink); text-underline-offset: 4px; }
+
+.footer-link-groups { display: grid; gap: 14px; max-width: 490px; }
+.footer-link-groups .footer-links { flex-wrap: wrap; justify-content: flex-end; gap: 12px 22px; line-height: 1.6; }
+@media (max-width: 760px) {
+  .footer-link-groups .footer-links { justify-content: flex-start; }
+}

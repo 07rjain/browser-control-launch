@@ -14,6 +14,10 @@ const errors = [];
 const videoMetadata = JSON.parse(readFileSync('src/video/metadata.json', 'utf8'));
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  // Vercel injects these endpoints only on deployed sites. Stub them locally.
+  if (['localhost', '127.0.0.1'].includes(new URL(origin).hostname)) {
+    await page.route('**/_vercel/{insights,speed-insights}/script.js', route => route.fulfill({ contentType: 'application/javascript', body: '' }));
+  }
   page.on('pageerror', error => errors.push(error.message));
   page.on('response', response => { if (response.status() >= 400) errors.push(`${response.status()} ${response.url()}`); });
   await page.goto(origin);
@@ -24,21 +28,21 @@ try {
   assert.ok(await page.evaluate(() => document.documentElement.scrollHeight < 2600), 'Keep the desktop page compact');
   for (const [label, content] of [
     ['Memory', 'prefers quiet places'],
-    ['Reusable skills', 'Weekly research'],
-    ['You’re in control', 'Auto review'],
-    ['Browser actions', 'Slow mornings'],
+    ['Skills', 'Weekly research'],
+    ['Control', 'Auto review'],
+    ['Browse', 'Slow mornings'],
   ]) {
     const tab = page.getByRole('tab', { name: label, exact: true });
     await tab.click();
     assert.equal(await tab.getAttribute('aria-selected'), 'true');
     assert.match((await page.getByRole('tabpanel').textContent()).toLowerCase(), new RegExp(content.toLowerCase()));
   }
-  await page.getByRole('tab', { name: 'You’re in control', exact: true }).click();
+  await page.getByRole('tab', { name: 'Control', exact: true }).click();
   const fullAccessExample = page.getByRole('button', { name: /Full access/ });
   await fullAccessExample.click();
   assert.equal(await fullAccessExample.getAttribute('aria-pressed'), 'true');
   assert.equal(await page.getByRole('button', { name: /Auto review/ }).getAttribute('aria-pressed'), 'false');
-  await page.getByRole('tab', { name: 'Browser actions', exact: true }).focus();
+  await page.getByRole('tab', { name: 'Browse', exact: true }).focus();
   await page.keyboard.press('ArrowRight');
   assert.equal(await page.getByRole('tab', { name: 'Memory', exact: true }).getAttribute('aria-selected'), 'true');
   await page.keyboard.press('Home');
@@ -69,15 +73,15 @@ try {
     await page.setViewportSize({ width, height: 844 });
     const dimensions = await page.evaluate(() => ({ actual: document.documentElement.scrollWidth, viewport: innerWidth }));
     assert.ok(dimensions.actual <= width, `Horizontal overflow at ${width}px: ${JSON.stringify(dimensions)}`);
-    for (const label of ['Memory', 'Reusable skills', 'You’re in control', 'Browser actions']) {
+    for (const label of ['Memory', 'Skills', 'Control', 'Browse']) {
       await page.getByRole('tab', { name: label, exact: true }).click();
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${label} overflows at ${width}px`);
     }
   }
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole('button', { name: 'Open navigation' }).click();
-  assert.equal(await page.getByRole('navigation').isVisible(), true);
-  await page.getByRole('navigation').getByRole('link', { name: 'Features', exact: true }).click();
+  assert.equal(await page.getByRole('navigation', { name: 'Main navigation' }).isVisible(), true);
+  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Features', exact: true }).click();
   assert.equal(await page.getByRole('button', { name: 'Open navigation' }).getAttribute('aria-expanded'), 'false');
   await page.evaluate(() => scrollTo(0, 0));
   await page.screenshot({ path: 'out/verification/mobile.png', fullPage: true });
