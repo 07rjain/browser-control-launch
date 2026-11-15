@@ -111,7 +111,6 @@
 .builder-contact summary:hover { background: #f3eaf3; }
 .builder-contact[open] summary svg { transform: rotate(180deg); }
 .builder-contact-content { max-width: 310px; padding: 4px 12px 10px; }
-.launch-page .builder-contact-content p { margin: 0 0 8px; font-size: 12px; line-height: 1.7; }
 .builder-contact-content nav { display: flex; flex-direction: column; align-items: flex-start; }
 .builder-contact-content a { display: inline-flex; align-items: center; min-width: 44px; min-height: 44px; padding: 8px 4px; text-underline-offset: 4px; }
 .builder-contact-content a:hover { text-decoration: underline; }
