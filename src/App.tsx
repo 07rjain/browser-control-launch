@@ -116,7 +116,13 @@ export function App() {
       <div><a className="footer-brand" href="#">Browser Control</a><p>Independent and open source. Not affiliated with OpenAI.</p></div>
       <div className="footer-link-groups">
         <nav className="footer-links" aria-label="Product links"><a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a><a href={SUPPORT_URL} target="_blank" rel="noreferrer">Support</a><a href={PRIVACY_URL} target="_blank" rel="noreferrer">Privacy</a></nav>
-        <nav className="footer-links" aria-label="Contact Rishabh"><a href={CREATOR_CALENDAR_URL} target="_blank" rel="noreferrer">Book a call</a><a href={CREATOR_WEBSITE_URL} target="_blank" rel="noreferrer">Rishabh’s website</a><a href={`mailto:${CREATOR_EMAIL}`}>{CREATOR_EMAIL}</a></nav>
+        <details className="builder-contact">
+          <summary>Meet the builder <ChevronDown size={16} aria-hidden="true" /></summary>
+          <div className="builder-contact-content">
+            <p>I’m Rishabh, the builder behind Browser Control.</p>
+            <nav aria-label="Contact Rishabh"><a href={CREATOR_CALENDAR_URL} target="_blank" rel="noreferrer">Book a call</a><a href={CREATOR_WEBSITE_URL} target="_blank" rel="noreferrer">Rishabh’s website</a><a href={`mailto:${CREATOR_EMAIL}`}>Email</a></nav>
+          </div>
+        </details>
       </div>
     </footer>
     {videoOpen && <VideoDialog onClose={closeVideo} />}
